@@ -1,0 +1,6 @@
+#define SAFEGUARD
+#define WARNINGS
+#define PEDANTIC_WARNINGS
+#define BOUNDS_CHECKING
+#define INVALID_PTR 1
+#define INVALID_COORD 2
