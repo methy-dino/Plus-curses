@@ -273,7 +273,6 @@ using namespace cppcurses;
 				return 0;
 			}
 			int window::draw_border(const drawable ls, const drawable rs, const drawable ts, const drawable bs, const drawable tl, const drawable tr, const drawable bl, const drawable br){
-				// TODO: implement.
 				unsigned cache = (unsigned)(getmaxx(win)-tl.width - tr.width);
 				// TOP:
 				draw_at({0, 0}, tl);
@@ -301,10 +300,9 @@ using namespace cppcurses;
 			int window::ncurses_box(chtype verch, chtype horch){
 				return box(win, verch, horch);
 			}
-
 window stdwin(NULL);
 
-	void cppcurses::init_cppcurses(){
+	void cppcurses::init_cppcurses(mmask_t mouse){
 		initscr();
 		start_color();
 		cbreak();
@@ -312,5 +310,21 @@ window stdwin(NULL);
 		nonl();
 		intrflush(stdscr, 0);
 		keypad(stdscr, 1);
+		mousemask(mouse, NULL);
 		stdwin.win = stdscr;
+	}
+	int cppcurses::new_color_pair(short index, short foreground, short background){
+		if (has_colors() == false){
+			return 1;
+		} 
+		return init_pair(index, foreground, background);
+	}
+
+	int cppcurses::new_color(short index, short red, short green, short blue){
+		if (has_colors() == false){
+			return 1;
+		} else if (can_change_color() == false){
+			return 2;
+		}
+		return init_color(index, red, green, blue);
 	}
