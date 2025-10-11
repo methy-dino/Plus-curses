@@ -78,7 +78,7 @@ using namespace cppcurses;
 						return INVALID_COORD;
 					}
 					#ifdef PEDANTIC_WARNINGS
-						if (winx < start.x+n){
+						if (winx < start.x+fill.width){
 							std::cerr << "draw_vline() at plus_curses.cpp: Invalid drawing" << std::endl;
 							std::cerr << "Line with start (" << start.x << ", " << start.y << ") will grow past window's dimensions: (" << winx << ", " <<  winy << ")" << std::endl; 
 						}
@@ -102,7 +102,6 @@ using namespace cppcurses;
 					if (wmove(win, start.y+i, start.x) != OK){
 						return INVALID_COORD;
 					}
-					// TODO: FIX
 					NCURSES_SIZE_T win_width;
 					win_width = getmaxy(win);
 					if (n > win_width - start.y){
@@ -240,6 +239,7 @@ using namespace cppcurses;
 					return 0;
 				#endif
 			}
+
 			/* wrapper for NCURSES' wborder, no multi byte chars.
 			 * ARGUMENTS:
 			 * chtype ls -> character for the left line of the border
@@ -254,6 +254,7 @@ using namespace cppcurses;
 			int window::ncurses_border(chtype ls, chtype rs, chtype ts, chtype bs, chtype tl, chtype tr, chtype bl, chtype br){
 				return wborder(win, ls, rs, ts, bs, tl, tr, bl, br);
 			}
+
 			int window::draw_box(const drawable ls, const drawable rs, const drawable ts, const drawable bs, const drawable tl, const drawable tr, const drawable bl, const drawable br, const vector2d top, const vector2d bottom){
 				// TOP:
 				unsigned cache = (unsigned)(bottom.x - top.x - tr.width);
@@ -272,6 +273,7 @@ using namespace cppcurses;
 				draw_vline({bottom.x, top.y+1}, rs, cache);
 				return 0;
 			}
+
 			int window::draw_border(const drawable ls, const drawable rs, const drawable ts, const drawable bs, const drawable tl, const drawable tr, const drawable bl, const drawable br){
 				unsigned cache = (unsigned)(getmaxx(win)-tl.width - tr.width);
 				// TOP:
@@ -283,9 +285,8 @@ using namespace cppcurses;
 				draw_at({0, (unsigned) getmaxy(win)-1}, bl);
 				draw_hline({bl.width, (unsigned) getmaxy(win)-1}, bs, (cache) / bs.width);
 				draw_at({(unsigned) getmaxx(win)-br.width,(unsigned) getmaxy(win)-1}, br);
-				// TODO:RIGHT LEFT.
 				// LEFT:
-				cache = (unsigned)(getmaxy(win) - 2);
+				cache = (unsigned)(getmaxy(win) - 3);
 				draw_vline({0,1}, ls, cache);
 				// RIGHT:
 				draw_vline({(unsigned) getmaxx(win)-rs.width, 1}, rs, cache);
@@ -300,6 +301,7 @@ using namespace cppcurses;
 			int window::ncurses_box(chtype verch, chtype horch){
 				return box(win, verch, horch);
 			}
+
 window stdwin(NULL);
 
 	void cppcurses::init_cppcurses(mmask_t mouse){
@@ -311,8 +313,10 @@ window stdwin(NULL);
 		intrflush(stdscr, 0);
 		keypad(stdscr, 1);
 		mousemask(mouse, NULL);
+		use_default_colors();
 		stdwin.win = stdscr;
 	}
+
 	int cppcurses::new_color_pair(short index, short foreground, short background){
 		if (has_colors() == false){
 			return 1;

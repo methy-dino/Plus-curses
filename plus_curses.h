@@ -96,9 +96,12 @@ namespace cppcurses {
 			inline int win_getch(void){
 				return wgetch(win);
 			}
+			inline int win_move(vector2d pos){
+				return wmove(win, pos.y, pos.x);
+			}
 	};
 	inline int get_mouse(MEVENT *event){
-		return getmouse(MEVENT);
+		return getmouse(event);
 	}
 	inline window create_window(vector2d start, vector2d dimensions){
 		return window(newwin(dimensions.x, dimensions.y, start.y, start.x));

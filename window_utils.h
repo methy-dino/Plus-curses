@@ -12,8 +12,8 @@ struct vector2d {
 		return x < b.x || y < b.y;
 	}
 };
+
 struct drawable {
 	char* text;
 	unsigned width;
 };
-
