@@ -99,6 +99,11 @@ namespace cppcurses {
 			inline int win_move(vector2d pos){
 				return wmove(win, pos.y, pos.x);
 			}
+
+			int line(vector2d start, vector2d end, drawable fill);
+		private:
+			inline int linexdom(vector2d start, vector2d end, drawable fill);
+			inline int lineydom(vector2d start, vector2d end, drawable fill);
 	};
 	inline int get_mouse(MEVENT *event){
 		return getmouse(event);

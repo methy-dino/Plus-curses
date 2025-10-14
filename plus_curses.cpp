@@ -302,6 +302,74 @@ using namespace cppcurses;
 				return box(win, verch, horch);
 			}
 
+			inline int window::linexdom(vector2d start, vector2d end, drawable fill){
+				int varx = end.x-start.x, vary = end.y-start.y, D, change;
+				if (end.y >= start.y){
+					change = 1;
+				} else {
+					vary = -vary;
+					change = -1;
+				}
+				D = 2*vary - varx;
+				while (start.x < end.x){	
+					draw_at(start, fill);
+					if (D > 0){
+						start.y += change;
+						D = D + 2 * (vary-varx);
+					} else {
+						D = D + 2 * vary;
+					}
+					start.x++;
+				}
+				return 1;
+			}
+
+			inline int window::lineydom(vector2d start, vector2d end, drawable fill){
+				int varx = end.x-start.x, vary = end.y-start.y, D,change;
+				if (end.x > start.x){
+					change = 1;
+				} else {
+					varx = -varx;
+					change = -1;
+				}
+				D = 2*varx - vary;
+				while (start.y <= end.y){	
+					draw_at(start, fill);
+					if (D > 0){
+						start.x += change;
+						D = D + 2 * (varx-vary);
+					} else {
+						D = D + 2 * varx;
+					}
+					start.y++;
+				}
+				return 1;
+			}
+
+			int window::line(vector2d start, vector2d end, drawable fill){
+				/* D = f(x0+2,y0+1) - f(x0, y0);
+				 * D = 2Δy - Δx
+				 * x++;
+				 * if D > 0 y++;
+				 */
+				if (abs((int)end.x - (int)start.x) > abs((int)end.y - (int)start.y)){
+					if (end.x < start.x){
+						vector2d tmp = start;
+						start = end;
+						end = tmp;
+					}
+					std::cerr << "XDOM"<<std::endl;
+					return linexdom(start, end, fill);
+				} else {
+					if (end.y < start.y){
+						vector2d tmp = start;
+						start = end;
+						end = tmp;
+					}
+					std::cerr << "YDOM"<<std::endl;
+					return lineydom(start, end, fill);
+				}
+			}
 window stdwin(NULL);
 
 	void cppcurses::init_cppcurses(mmask_t mouse){
@@ -320,7 +388,9 @@ window stdwin(NULL);
 	int cppcurses::new_color_pair(short index, short foreground, short background){
 		if (has_colors() == false){
 			return 1;
-		} 
+		} else if (index == 0 || index > COLOR_PAIRS){
+			return 3;
+		}
 		return init_pair(index, foreground, background);
 	}
 
@@ -329,6 +399,8 @@ window stdwin(NULL);
 			return 1;
 		} else if (can_change_color() == false){
 			return 2;
+		} else if (index == 0 || index >= COLORS){
+			return 3;
 		}
 		return init_color(index, red, green, blue);
 	}
