@@ -358,7 +358,6 @@ using namespace cppcurses;
 						start = end;
 						end = tmp;
 					}
-					std::cerr << "XDOM"<<std::endl;
 					return linexdom(start, end, fill);
 				} else {
 					if (end.y < start.y){
@@ -366,7 +365,6 @@ using namespace cppcurses;
 						start = end;
 						end = tmp;
 					}
-					std::cerr << "YDOM"<<std::endl;
 					return lineydom(start, end, fill);
 				}
 			}
