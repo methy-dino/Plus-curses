@@ -1,7 +1,7 @@
 #pragma once
 struct vector2d {
-	unsigned x, y;
-	vector2d(unsigned x, unsigned y) {
+	int x, y;
+	vector2d(int x, int y) {
 		this->x = x;
 		this->y = y;
 	}

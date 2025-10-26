@@ -257,17 +257,17 @@ using namespace cppcurses;
 
 			int window::draw_box(const drawable ls, const drawable rs, const drawable ts, const drawable bs, const drawable tl, const drawable tr, const drawable bl, const drawable br, const vector2d top, const vector2d bottom){
 				// TOP:
-				unsigned cache = (unsigned)(bottom.x - top.x - tr.width);
+				int cache = (bottom.x - top.x - tr.width);
 				draw_at(top, tl);
-				draw_hline({top.x+tl.width, top.y}, ts, (cache) / ts.width);
-				draw_at({(unsigned) bottom.x, top.y}, tr);
+				draw_hline({top.x + (int) tl.width, top.y}, ts, (cache) / (int) ts.width);
+				draw_at({bottom.x, top.y}, tr);
 				// BOTTOM:
-				cache = (unsigned)(bottom.x - top.x - br.width);
+				cache = (bottom.x - top.x - (int)br.width);
 				draw_at({top.x, bottom.y}, bl);
-				draw_hline({top.x + bl.width, bottom.y}, bs, (cache) / bs.width);
-				draw_at({(unsigned) bottom.x,bottom.y}, br);
+				draw_hline({top.x + (int)bl.width, bottom.y}, bs, (cache) / (int)bs.width);
+				draw_at({ bottom.x,bottom.y}, br);
 				// LEFT:
-				cache = (unsigned)(bottom.y - top.y-1);
+				cache = (bottom.y - top.y-1);
 				draw_vline({top.x,top.y + 1}, ls, cache);
 				// RIGHT:
 				draw_vline({bottom.x, top.y+1}, rs, cache);
@@ -275,21 +275,21 @@ using namespace cppcurses;
 			}
 
 			int window::draw_border(const drawable ls, const drawable rs, const drawable ts, const drawable bs, const drawable tl, const drawable tr, const drawable bl, const drawable br){
-				unsigned cache = (unsigned)(getmaxx(win)-tl.width - tr.width);
+				unsigned cache = (getmaxx(win)-tl.width - tr.width);
 				// TOP:
 				draw_at({0, 0}, tl);
-				draw_hline({tl.width, 0}, ts, (cache) / ts.width);
-				draw_at({(unsigned) getmaxx(win)-tr.width, 0}, tr);
+				draw_hline({(int)tl.width, 0}, ts, (cache) / ts.width);
+				draw_at({ getmaxx(win)-(int)tr.width, 0}, tr);
 				// BOTTOM:
-				cache = (unsigned)(getmaxx(win)- bl.width - br.width);
-				draw_at({0, (unsigned) getmaxy(win)-1}, bl);
-				draw_hline({bl.width, (unsigned) getmaxy(win)-1}, bs, (cache) / bs.width);
-				draw_at({(unsigned) getmaxx(win)-br.width,(unsigned) getmaxy(win)-1}, br);
+				cache = (getmaxx(win)- bl.width - br.width);
+				draw_at({0,  getmaxy(win)-1}, bl);
+				draw_hline({(int)bl.width,  getmaxy(win)-1}, bs, (cache) / bs.width);
+				draw_at({ getmaxx(win)-(int)br.width, getmaxy(win)-1}, br);
 				// LEFT:
-				cache = (unsigned)(getmaxy(win) - 3);
+				cache = (getmaxy(win) - 3);
 				draw_vline({0,1}, ls, cache);
 				// RIGHT:
-				draw_vline({(unsigned) getmaxx(win)-rs.width, 1}, rs, cache);
+				draw_vline({ getmaxx(win)-(int)rs.width, 1}, rs, cache);
 				return 0;
 			}
 
@@ -344,6 +344,82 @@ using namespace cppcurses;
 					start.y++;
 				}
 				return 1;
+			}
+
+			int window::circle(const vector2d center, const unsigned radius,  const drawable border) {
+				int temp = radius >> 4, varx = radius, vary = 0, cache;
+				while (varx >= vary){
+					/* paint center ± varx and center ± vary*/
+					draw_at({center.x+varx, center.y+vary}, border);
+					draw_at({center.x+vary, center.y+varx}, border);
+					/* ------------------- */
+					draw_at({center.x-varx, center.y+vary}, border);
+					draw_at({center.x-vary, center.y+varx}, border);
+					/* ------------------- */
+					draw_at({center.x+varx, center.y-vary}, border);
+					draw_at({center.x+vary, center.y-varx}, border);
+					/* ------------------- */
+					draw_at({center.x-varx, center.y-vary}, border);
+					draw_at({center.x-vary, center.y-varx}, border);
+					vary++;
+					temp += vary;
+					cache = temp - varx;
+					if (cache >= 0){
+						temp = cache;
+						varx--;
+					}
+				}
+				return 0;
+			}
+
+			int window::filled_circle(const vector2d center, const unsigned radius,  const drawable border) {
+				int temp = radius >> 4, varx = radius, vary = 0, cache, prevx, prevy, tmpy, tmplen;
+				prevx = 0;
+				prevy = 0;
+				draw_vline({center.x, center.y-(int)radius}, border,radius*2);
+				while (varx >= vary){
+					/* paint center ± varx and center ± vary*/
+					if (prevx != varx){
+						if (center.y-vary < 0){
+							tmpy = center.y;
+							tmplen = center.y + vary; 
+						} else {
+							tmpy = vary;
+							tmplen = vary<<1; 
+						}
+						draw_vline({center.x+varx, center.y-tmpy}, border, tmplen);
+						draw_vline({center.x-varx, center.y-tmpy}, border, tmplen);
+					}
+					if (prevy != vary){
+						if (center.x-varx < 0){
+							tmpy = center.x;
+							tmplen = center.x + varx; 
+						} else {
+							tmpy = varx;
+							tmplen = varx<<1; 
+						}
+						draw_vline({center.x+vary, center.y-tmpy}, border, tmplen);
+						draw_vline({center.x-vary, center.y-tmpy}, border, tmplen);
+					}
+					prevx = varx;
+					prevy = vary;
+					draw_at({center.x+varx, center.y+vary}, border);
+					draw_at({center.x+vary, center.y+varx}, border);
+					draw_at({center.x-varx, center.y+vary}, border);
+					draw_at({center.x-vary, center.y+varx}, border);
+					draw_at({center.x+varx, center.y-vary}, border);
+					draw_at({center.x+vary, center.y-varx}, border);
+					draw_at({center.x-varx, center.y-vary}, border);
+					draw_at({center.x-vary, center.y-varx}, border);
+					vary++;
+					temp += vary;
+					cache = temp - varx;
+					if (cache >= 0){
+						temp = cache;
+						varx--;
+					}
+				}
+				return 0;
 			}
 
 			int window::line(vector2d start, vector2d end, drawable fill){

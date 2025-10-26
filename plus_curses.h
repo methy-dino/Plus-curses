@@ -4,7 +4,6 @@
 #include <iostream>
 #include "window_utils.h"
 #include <unistd.h>
-#include "settings.h"
 namespace cppcurses {
 	class window {
 		public:
@@ -78,20 +77,32 @@ namespace cppcurses {
 				return wattrset(win, attrs);
 			}
 
+			inline int win_attr_set(int attrs, short pair){
+				return wattr_set(win, attrs, pair, NULL);
+			}
 			/* accepts COLOR_PAIRs and curses attributes
 			 * turns on given attribute.
 			 */
-			inline int win_attron(int attrs){
+			inline int win_attron(attr_t attrs){
 				return wattron(win, attrs);
 			}
 
+			inline int win_attr_on(attr_t attrs){
+				return wattr_on(win, attrs, NULL);
+			}
 			/* accepts COLOR_PAIRs and curses attributes
 			 * turns off the given attribute.
 			 */
-			inline int win_attroff(int attrs){
+			inline int win_attroff(attr_t attrs){
 				return wattroff(win, attrs);
 			}
+			inline int win_attr_off(attr_t attrs, short pair){
+				return wattr_off(win, attrs, NULL);
+			}
 
+			inline int win_attr_get( attr_t *attrs, short *pair){
+				return wattr_get(win, attrs, pair, NULL);
+			}
 			/* gets character from stdin when the focus is the window */
 			inline int win_getch(void){
 				return wgetch(win);
@@ -101,6 +112,8 @@ namespace cppcurses {
 			}
 
 			int line(vector2d start, vector2d end, drawable fill);
+			int circle(vector2d center, unsigned radius, drawable border);
+			int filled_circle(vector2d center, unsigned radius, drawable border);
 		private:
 			inline int linexdom(vector2d start, vector2d end, drawable fill);
 			inline int lineydom(vector2d start, vector2d end, drawable fill);
